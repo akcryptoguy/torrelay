@@ -145,7 +145,8 @@ echo "----------------------------------------------------------------------"
 sleep 5
 nyx
 clear
-echo "The is your tor relay's private fingerprint:"
+IPV4=`/usr/bin/wget -q -O - http://ipv4.icanhazip.com/ | /usr/bin/tail`
+echo -e "The is your tor relay's private fingerprint for IP ($IPV4):"
 cat /var/lib/tor/fingerprint
 echo -e "\nThis is your tor relay's private key to backup"
 cat /var/lib/tor/keys/secret_id_key
