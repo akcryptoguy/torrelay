@@ -52,7 +52,7 @@ fi
 
 echo "Installing Tor..."
 sudo apt-get -y install tor deb.torproject.org-keyring > /dev/null
-sudo apt install tor tor-geoipdb torsocks deb.torproject.org-keyring
+sudo apt -y install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
 
 echo "Configuring UFW..."
@@ -80,10 +80,12 @@ ControlPort 9051
 CookieAuthentication 1
 MaxMemInQueues 100MB
 DisableDebuggerAttachment 0
+NodeFamily 7CB76558E894800A00F5B602B37D8E4F121F5958
 
 EOF
 
 echo "Setting Tor config..."
+touch /root/.nyx/config
 cat << 'EOF2' | sudo tee /root/.nyx/config > /dev/null
 # nyx config can go here (https://nyx.torproject.org/nyxrc.sample)
 max_log_size 1000
