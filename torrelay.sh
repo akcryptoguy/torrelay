@@ -78,6 +78,7 @@ AccountingMax 1000 GB
 DisableDebuggerAttachment 0
 ControlPort 9051
 CookieAuthentication 1
+DisableDebuggerAttachment 0
 
 EOF
 
