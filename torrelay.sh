@@ -37,9 +37,7 @@ echo "deb-src https://deb.torproject.org/torproject.org $RELEASE main" | sudo te
 echo "Adding Torproject GPG key..."
 # gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 > /dev/null
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /dev/null
-
-
+# gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /dev/null
 
 echo "Updating package list..."
 sudo apt-get -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
@@ -78,7 +76,6 @@ RelayBandwidthRate 5 MBits
 RelayBandwidthBurst 6 MBits
 AccountingStart month 1 00:00
 AccountingMax 1000 GB
-DisableDebuggerAttachment 0
 ControlPort 9051
 CookieAuthentication 1
 MaxMemInQueues 256MB
@@ -88,6 +85,7 @@ NodeFamily 7CB76558E894800A00F5B602B37D8E4F121F5958,ADA083D5BFA2CB071AB7FA976307
 EOF
 
 echo "Setting Tor config..."
+mkdir /root/.nyx
 touch /root/.nyx/config
 cat << 'EOF2' | sudo tee /root/.nyx/config > /dev/null
 # nyx config can go here (https://nyx.torproject.org/nyxrc.sample)
@@ -123,17 +121,15 @@ then
   fi
 fi
 
-# if $ENABLE_AUTO_UPDATE
-# then
-#   echo "Enabling unattended upgrades..."
-#   sudo apt-get install -y unattended-upgrades apt-listchanges
-#   DISTRO=$(lsb_release -is)
-#   sudo wget -q -O /etc/apt/apt.conf.d/50unattended-upgrades "https://raw.githubusercontent.com/flxn/tor-relay-configurator/master/misc/50unattended-upgrades.$DISTRO"
-# fi
-
 echo "Blocking torrent traffic..."
+cat << 'EOF3' | sudo tee /etc/tor/blocktorrent.sh > /dev/null
 for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
-(crontab -l ; echo "0 * * * * iptables --flush OUTPUT;for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done") | crontab -
+
+EOF3
+
+chmod 0700 /etc/tor/blocktorrent.sh
+for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
+(crontab -l ; echo "0 * * * * /etc/tor/blocktorrent.sh ") | crontab -
 
 sleep 5
 echo "Reloading Tor config..."
