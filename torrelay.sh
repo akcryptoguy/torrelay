@@ -21,10 +21,10 @@ echo "This script will ask for your sudo password."
 echo "----------------------------------------------------------------------"
 
 echo "Updating package list..."
-sudo apt-get -y update > /dev/null
+sudo apt -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
 
 echo "Installing necessary packages..."
-sudo apt-get -y install apt-transport-https psmisc dirmngr ntpdate > /dev/null
+sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install apt-transport-https psmisc dirmngr ntpdate > /dev/null
 
 echo "Updating NTP..."
 sudo ntpdate pool.ntp.org > /dev/null
@@ -39,20 +39,20 @@ gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 >
 gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /dev/null
 
 echo "Updating package list..."
-sudo apt-get -y update > /dev/null
+sudo apt -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
 
 if $INSTALL_NYX
 then
   echo "Installing NYX..."
   #sudo apt-get -y install tor-arm > /dev/null
-  sudo apt-get -y install python-setuptools
+  sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install python-setuptools
   sudo easy_install pip
   sudo pip install nyx
 fi
 
 echo "Installing Tor..."
-sudo apt-get -y install tor deb.torproject.org-keyring > /dev/null
-sudo apt -y install tor tor-geoipdb torsocks deb.torproject.org-keyring
+sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor deb.torproject.org-keyring > /dev/null
+sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
 
 echo "Configuring UFW..."
@@ -133,7 +133,6 @@ for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { prin
 (crontab -l ; echo "0 * * * * iptables --flush OUTPUT;for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done") | crontab -
 
 sleep 5
-
 echo "Reloading Tor config..."
 sudo /etc/init.d/tor restart
 
@@ -144,8 +143,10 @@ echo "Check /var/log/tor/notices.log for an entry like:"
 echo "\"Self-testing indicates your ORPort is reachable from the outside. Excellent.\""
 echo "----------------------------------------------------------------------"
 sleep 5
-#tail -f /var/log/tor/log
 nyx
-
-
-# recommend backing up private key:    /var/lib/tor/keys/secret_id_key
+clear
+echo "The is your tor relay's private fingerprint:"
+cat /var/lib/tor/fingerprint
+echo -e "\nThis is your tor relay's private key to backup"
+cat /var/lib/tor/keys/secret_id_key
+echo -e "\n"
