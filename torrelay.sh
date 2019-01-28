@@ -21,15 +21,15 @@ echo "This script will ask for your sudo password."
 echo "----------------------------------------------------------------------"
 
 echo "Updating package list..."
-sudo apt -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
+sudo apt-get -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
 
 echo "Installing necessary packages..."
-sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install apt-transport-https psmisc dirmngr ntpdate > /dev/null
+sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install apt-transport-https psmisc dirmngr ntpdate > /dev/null
 
 echo "Updating NTP..."
 sudo ntpdate pool.ntp.org > /dev/null
 
-echo "Adding Torproject apt repository..."
+echo "Adding Torproject apt-get repository..."
 sudo touch /etc/apt/sources.list.d/tor.list
 echo "deb https://deb.torproject.org/torproject.org $RELEASE main" | sudo tee /etc/apt/sources.list.d/tor.list > /dev/null
 echo "deb-src https://deb.torproject.org/torproject.org $RELEASE main" | sudo tee --append /etc/apt/sources.list.d/tor.list > /dev/null
@@ -39,20 +39,20 @@ gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 >
 gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /dev/null
 
 echo "Updating package list..."
-sudo apt -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
+sudo apt-get -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
 
 if $INSTALL_NYX
 then
   echo "Installing NYX..."
   #sudo apt-get -y install tor-arm > /dev/null
-  sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install python-setuptools
+  sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install python-setuptools > /dev/null
   sudo easy_install pip
   sudo pip install nyx
 fi
 
 echo "Installing Tor..."
-sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor deb.torproject.org-keyring > /dev/null
-sudo apt -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor tor-geoipdb torsocks deb.torproject.org-keyring
+sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor deb.torproject.org-keyring > /dev/null
+sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
 
 echo "Configuring UFW..."
