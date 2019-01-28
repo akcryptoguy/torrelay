@@ -35,8 +35,11 @@ echo "deb https://deb.torproject.org/torproject.org $RELEASE main" | sudo tee /e
 echo "deb-src https://deb.torproject.org/torproject.org $RELEASE main" | sudo tee --append /etc/apt/sources.list.d/tor.list > /dev/null
 
 echo "Adding Torproject GPG key..."
-gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 > /dev/null
+# gpg --keyserver keys.gnupg.net --recv A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 > /dev/null
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
 gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /dev/null
+
+
 
 echo "Updating package list..."
 sudo apt-get -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true update > /dev/null
