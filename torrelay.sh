@@ -56,20 +56,20 @@ sudo apt install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
 
 echo "Configuring UFW..."
-sudo ufw allow 9001
-sudo ufw allow 9030
+sudo ufw allow 443
+sudo ufw allow 80
 sudo ufw reload
 
 echo "Setting Tor config..."
 cat << 'EOF' | sudo tee /etc/tor/torrc > /dev/null
 SocksPort 0
 RunAsDaemon 1
-ORPort 9001
-ORPort [INSERT_IPV6_ADDRESS]:9001
-Nickname CDMTOR
-ContactInfo akcryptoguy [akcryptoguy|gmail|com] [tor-relay.co]
+ORPort 443
+ORPort [INSERT_IPV6_ADDRESS]:443
+Nickname AKtorFirefly
+ContactInfo akcryptoguy [akcryptoguy|gmail|com]
 Log notice file /var/log/tor/notices.log
-DirPort 9030
+DirPort 80
 ExitPolicy reject6 *:*, reject *:*
 RelayBandwidthRate 5 MBits
 RelayBandwidthBurst 6 MBits
@@ -78,9 +78,17 @@ AccountingMax 1000 GB
 DisableDebuggerAttachment 0
 ControlPort 9051
 CookieAuthentication 1
+MaxMemInQueues 100MB
 DisableDebuggerAttachment 0
 
 EOF
+
+echo "Setting Tor config..."
+cat << 'EOF2' | sudo tee /root/.nyx/config > /dev/null
+# nyx config can go here (https://nyx.torproject.org/nyxrc.sample)
+max_log_size 1000
+
+EOF2
 
 if $IS_EXIT
 then
