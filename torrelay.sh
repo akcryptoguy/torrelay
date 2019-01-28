@@ -1,6 +1,6 @@
 RELEASE='xenial'
 IS_EXIT=false
-INSTALL_ARM=true
+INSTALL_NYX=true
 CHECK_IPV6=true
 ENABLE_AUTO_UPDATE=true
 
@@ -41,15 +41,24 @@ gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add - > /de
 echo "Updating package list..."
 sudo apt-get -y update > /dev/null
 
-if $INSTALL_ARM
+if $INSTALL_NYX
 then
-  echo "Installing ARM..."
-  sudo apt-get -y install tor-arm > /dev/null
+  echo "Installing NYX..."
+  #sudo apt-get -y install tor-arm > /dev/null
+  sudo apt-get -y install python-setuptools
+  sudo easy_install pip
+  sudo pip install nyx
 fi
 
 echo "Installing Tor..."
 sudo apt-get -y install tor deb.torproject.org-keyring > /dev/null
+sudo apt install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
+
+echo "Configuring UFW..."
+sudo ufw allow 9001
+sudo ufw allow 9030
+sudo ufw reload
 
 echo "Setting Tor config..."
 cat << 'EOF' | sudo tee /etc/tor/torrc > /dev/null
@@ -58,7 +67,7 @@ RunAsDaemon 1
 ORPort 9001
 ORPort [INSERT_IPV6_ADDRESS]:9001
 Nickname CDMTOR
-ContactInfo ak tor guy at gmail dot com (replace tor w/ crypto) [tor-relay.co]
+ContactInfo akcryptoguy [akcryptoguy|gmail|com] [tor-relay.co]
 Log notice file /var/log/tor/notices.log
 DirPort 9030
 ExitPolicy reject6 *:*, reject *:*
@@ -82,7 +91,8 @@ fi
 
 if $CHECK_IPV6
 then
-  IPV6_ADDRESS=$(ip -6 addr | grep inet6 | grep "scope global" | awk '{print $2}' | cut -d'/' -f1)
+  IPV6_ADDRESS=`/usr/bin/wget -q -O - http://ipv6.icanhazip.com/ | /usr/bin/tail`
+  # IPV6_ADDRESS=$(ip -6 addr | grep inet6 | grep "scope global" | awk '{print $2}' | cut -d'/' -f1)
   if [ -z "$IPV6_ADDRESS" ]
   then
     sudo /etc/init.d/tor stop
@@ -92,22 +102,22 @@ then
     echo -e "\e[31mIPv6 support has been disabled\e[39m"
     echo "If you want to enable it manually find out your IPv6 address and add this line to your /etc/tor/torrc"
     echo "ORPort [YOUR_IPV6_ADDRESS]:YOUR_ORPORT (example: \"ORPort [2001:123:4567:89ab::1]:9001\")"
-    echo "Then run \"sudo /etc/init.d/tor restart\" to rstart Tor"
+    echo "Then run \"sudo /etc/init.d/tor restart\" to restart Tor"
   else
     sudo sed -i "s/INSERT_IPV6_ADDRESS/$IPV6_ADDRESS/" /etc/tor/torrc
     echo -e "\e[32mIPv6 Support enabled ($IPV6_ADDRESS)\e[39m"
   fi
 fi
 
-if $ENABLE_AUTO_UPDATE
-then
-  echo "Enabling unattended upgrades..."
-  sudo apt-get install -y unattended-upgrades apt-listchanges
-  DISTRO=$(lsb_release -is)
-  sudo wget -q -O /etc/apt/apt.conf.d/50unattended-upgrades "https://raw.githubusercontent.com/flxn/tor-relay-configurator/master/misc/50unattended-upgrades.$DISTRO"
-fi
+# if $ENABLE_AUTO_UPDATE
+# then
+#   echo "Enabling unattended upgrades..."
+#   sudo apt-get install -y unattended-upgrades apt-listchanges
+#   DISTRO=$(lsb_release -is)
+#   sudo wget -q -O /etc/apt/apt.conf.d/50unattended-upgrades "https://raw.githubusercontent.com/flxn/tor-relay-configurator/master/misc/50unattended-upgrades.$DISTRO"
+# fi
 
-sleep 10
+sleep 5
 
 echo "Reloading Tor config..."
 sudo /etc/init.d/tor restart
@@ -118,5 +128,6 @@ echo "Tor will now check if your ports are reachable. This may take up to 20 min
 echo "Check /var/log/tor/notices.log for an entry like:"
 echo "\"Self-testing indicates your ORPort is reachable from the outside. Excellent.\""
 echo "----------------------------------------------------------------------"
-#sleep 5
+sleep 5
 #tail -f /var/log/tor/log
+nyx
