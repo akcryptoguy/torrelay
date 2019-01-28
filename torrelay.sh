@@ -78,7 +78,7 @@ AccountingMax 1000 GB
 DisableDebuggerAttachment 0
 ControlPort 9051
 CookieAuthentication 1
-MaxMemInQueues 100MB
+MaxMemInQueues 256MB
 DisableDebuggerAttachment 0
 NodeFamily 7CB76558E894800A00F5B602B37D8E4F121F5958
 
