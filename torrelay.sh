@@ -117,6 +117,10 @@ fi
 #   sudo wget -q -O /etc/apt/apt.conf.d/50unattended-upgrades "https://raw.githubusercontent.com/flxn/tor-relay-configurator/master/misc/50unattended-upgrades.$DISTRO"
 # fi
 
+echo "Blocking torrent traffic..."
+for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
+(crontab -l ; echo "0 * * * * iptables --flush OUTPUT;for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done") | crontab -
+
 sleep 5
 
 echo "Reloading Tor config..."
@@ -131,3 +135,6 @@ echo "----------------------------------------------------------------------"
 sleep 5
 #tail -f /var/log/tor/log
 nyx
+
+
+# recommend backing up private key:    /var/lib/tor/keys/secret_id_key
