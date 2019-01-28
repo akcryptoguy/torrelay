@@ -73,7 +73,7 @@ Log notice file /var/log/tor/notices.log
 DirPort 80
 ExitPolicy reject6 *:*, reject *:*
 RelayBandwidthRate 5 MBits
-RelayBandwidthBurst 6 MBits
+RelayBandwidthBurst 10 MBits
 AccountingStart month 1 00:00
 AccountingMax 1000 GB
 ControlPort 9051
