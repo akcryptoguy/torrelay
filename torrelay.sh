@@ -101,9 +101,21 @@ then
   sudo wget -q -O /etc/tor/tor-exit-notice.html "https://raw.githubusercontent.com/flxn/tor-relay-configurator/master/misc/tor-exit-notice.html"
 fi
 
+echo "Blocking torrent traffic..."
+cat << 'EOF3' | sudo tee /etc/tor/blocktorrent.sh > /dev/null
+for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
+
+EOF3
+
+chmod 0700 /etc/tor/blocktorrent.sh
+for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
+(crontab -l ; echo "0 * * * * /etc/tor/blocktorrent.sh ") | crontab -
+
 if $CHECK_IPV6
 then
   IPV6_ADDRESS=`/usr/bin/wget -q -O - http://ipv6.icanhazip.com/ | /usr/bin/tail`
+  # this gets you a list of all IPv6 addresses
+  # ip -o -6 addr list eth0 | awk '{print $4}' | cut -d/ -f1
   # IPV6_ADDRESS=$(ip -6 addr | grep inet6 | grep "scope global" | awk '{print $2}' | cut -d'/' -f1)
   if [ -z "$IPV6_ADDRESS" ]
   then
@@ -120,16 +132,6 @@ then
     echo -e "\e[32mIPv6 Support enabled ($IPV6_ADDRESS)\e[39m"
   fi
 fi
-
-echo "Blocking torrent traffic..."
-cat << 'EOF3' | sudo tee /etc/tor/blocktorrent.sh > /dev/null
-for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
-
-EOF3
-
-chmod 0700 /etc/tor/blocktorrent.sh
-for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
-(crontab -l ; echo "0 * * * * /etc/tor/blocktorrent.sh ") | crontab -
 
 sleep 5
 echo "Reloading Tor config..."
