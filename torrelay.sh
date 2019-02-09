@@ -68,19 +68,20 @@ RunAsDaemon 1
 ORPort 443
 ORPort [INSERT_IPV6_ADDRESS]:443
 Nickname AKtorFirefly
+Address [INSERT_IPV4_ADDRESS]
 ContactInfo akcryptoguy [akcryptoguy|gmail|com]
 Log notice file /var/log/tor/notices.log
 DirPort 80
 ExitPolicy reject6 *:*, reject *:*
-RelayBandwidthRate 5 MBits
-RelayBandwidthBurst 10 MBits
+RelayBandwidthRate 3 MBits
+RelayBandwidthBurst 6 MBits
 AccountingStart month 1 00:00
-AccountingMax 1000 GB
+# AccountingMax 1000 GB
 ControlPort 9051
 CookieAuthentication 1
 MaxMemInQueues 256MB
 DisableDebuggerAttachment 0
-NodeFamily 7CB76558E894800A00F5B602B37D8E4F121F5958,ADA083D5BFA2CB071AB7FA976307200BD1B111B8
+# NodeFamily 7CB76558E894800A00F5B602B37D8E4F121F5958,ADA083D5BFA2CB071AB7FA976307200BD1B111B8
 
 EOF
 
@@ -110,6 +111,11 @@ EOF3
 chmod 0700 /etc/tor/blocktorrent.sh
 for j in `for a in $(wget -qO- http://www.trackon.org/api/all | awk -F/ ' { print $3 }' ); do dig +short a $a; done |grep -v [a-z]|sort|uniq`; do iptables -I OUTPUT -d $j -j DROP; done
 (crontab -l ; echo "0 * * * * /etc/tor/blocktorrent.sh ") | crontab -
+
+# swap in ipv4 address
+IPV4_ADDRESS=`/usr/bin/wget -q -O - http://ipv4.icanhazip.com/ | /usr/bin/tail`
+sudo sed -i "s/INSERT_IPV4_ADDRESS/$IPV4_ADDRESS/" /etc/tor/torrc
+echo -e "\e[32mIPv4 Support enabled ($IPV4_ADDRESS)\e[39m"
 
 if $CHECK_IPV6
 then
