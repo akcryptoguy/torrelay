@@ -52,8 +52,8 @@ then
 fi
 
 echo "Installing Tor..."
-sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor deb.torproject.org-keyring > /dev/null
-sudo apt-get -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor tor-geoipdb torsocks deb.torproject.org-keyring
+sudo apt-get --allow-unauthenticated -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor deb.torproject.org-keyring > /dev/null
+sudo apt-get --allow-unauthenticated -qqy -o=Dpkg::Use-Pty=0 -o=Acquire::ForceIPv4=true install tor tor-geoipdb torsocks deb.torproject.org-keyring
 sudo chown -R debian-tor:debian-tor /var/log/tor
 
 echo "Configuring UFW..."
